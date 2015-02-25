@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-3 col-md-2 sidebar">
+      <ul class="nav nav-sidebar">
+      <li {% if not active_user%} class="active" {% endif %}><a href="{{ url_for('homepage',t=active_team.id)}}"><h4>{{active_team.name}}</h4></a></li>
+        {% for user in users %}
+        <li {% if active_user and user.id == active_user.id %} class="active"{% endif %}>
+          <a href="{{url_for('user_detail',user_id=user.id)}}">{{user.full_name}}</a>
+        </li>
+        {% endfor%}
+      </ul>
+    </div>
+    <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+      {% if active_user %}
+      <ul class="nav nav-tabs" role="tablist">
+        <li class="active">
+          <a href="#user" role="tab" data-toggle="tab">{{active_user.full_name}}</a>
+        </li>
+        {% if user.can('edit',active_user) %}
+        <li>
+          <a href="#score_form" role="tab" data-toggle="tab">自评</a>
+        </li>
+        {% endif %}
+      </ul>
+      <div class="tab-content">
+        <div class="tab-pane active" id="user">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Week</th>
+                {% if active_user.is_team_leader  %}
+                <th>团队平均</th>
+                {% else %}
+                <th>自评</th>
+                {% endif%}
+                <th>Score</th>
+                <th>Rater</th>
+                <th>Operaionts</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for score in pagination.get_list() %}
+              <tr>
+                <td>{{score.id}}</td>
+                <td>{{score.week.name}}</td>
+                <td>
+                  {% if user.can('read',score) %}
+                  <span class="label label-default {{score.get_self_score()|labeled}}">{{score.get_self_score()}}</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <span class="label label-default {{score.get_score()|labeled}}">
+                    {{score.get_score()}}
+                    {% if active_user.is_team_leader %}
+                      ({{score.score}})
+                    {% endif %}
+                  </span>
+                </td>
+                <td>{{score.rater.full_name}}</td>
+                <td>
+                  {% if user.can('edit',score) %}
+                  <a class="btn btn-xs btn-primary" href="{{url_for('edit_score',user_id=score.user.id,score_id=score.id)}}">评分</a>
+                  {% endif %}
+                  <a class="btn btn-xs btn-success" href="{{url_for('show_score',user_id=score.user.id,score_id=score.id)}}">查看</a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="tab-pane" id="score_form">
+          
+            <div class="panel-body">
+              <form action="{{url_for('save_score',user_id=active_user.id)}}" role="form" method="POST">
+                <div class="form-group">
+                  <label class="radio-inline">
+                    <input type="radio" name="score" id="inlineRadio1" value="1" required><span class="label label-default label-1">1</span></label>
+                  <label class="radio-inline">
+                    <input type="radio" name="score" id="inlineRadio2" value="2" required><span class="label label-default label-2">2</span></label>
+                  <label class="radio-inline">
+                    <input type="radio" name="score" id="inlineRadio3" value="3" required><span class="label label-default label-3">3</span></label>
+                  <label class="radio-inline">
+                    <input type="radio" name="score" id="inlineRadio4" value="4" required><span class="label label-default label-4">4</span></label>
+                  <label class="radio-inline">
+                    <input type="radio" name="score" id="inlineRadio5" value="5" required><span class="label label-default label-5">5</span></label>
+                </div>
+                <div class="form-group">
+                  <select name="week" class="form-control" required>
+                    {% for week in weeks %}
+                    <option value="{{week.id}}">{{week.name}}</option>
+                    {% endfor%}
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="description">备注</label>
+                  <textarea class="form-control" rows="10" id="description" name="self_memo" placeholder="Enter Memo..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+              </form>
+            </div>
+          
+        </div>
+      </div>
+      {% if page > 1 %}
+      <a class="previous" href="{{url_for('user_detail',user_id=active_user.id,page=page-1)}}">Previous</a>
+      {% endif %}
+      {% if pagination.get_pages() > page %}
+      <a class="next" href="{{url_for('user_detail',user_id=active_user.id,page=page+1)}}">Next</a>
+      {% endif %}  
+    {% else %}
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>姓名</th>
+            <th>Email</th>
+            <th>最近绩效</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+          <tr>
+            <td>{{user.id}}</td>
+            <td>
+            <a href="{{url_for('user_detail',user_id=user.id)}}">{{user.full_name}}</a>
+            </td>
+            <td>{{user.email}}</td>
+            <td>{{label_scores(user.recently_score())}}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+          
+    {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

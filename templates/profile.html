@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+      <form role="form" action="{{url_for('update_user')}}" method="POST">
+        <div class="form-group">
+          <label for="loginName">Login Name</label>
+          <input type="text" disabled class="form-control" id="loginName" name="username" placeholder="Enter Login Name" value="{{user.username}}"></div>
+        <div class="form-group">
+          <label for="fullName">Full Name</label>
+          <input type="text" class="form-control" id="fullName" name="full_name" placeholder="Enter Full Name" value="{{user.full_name}}"></div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" class="form-control" id="email" name="email" placeholder="Enter email" value="{{user.email}}"></div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" class="form-control" id="password" name="password" placeholder="Password" value="{{user.password}}"></div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
