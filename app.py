@@ -6,7 +6,7 @@ from flask_peewee.db import Database
 from flask.ext.moment import Moment
 
 app = Flask(__name__)
-app.config.from_object('config.ProductionConfig')
+app.config.from_object('config.Configuration')
 
 moment = Moment(app)
 db = Database(app)

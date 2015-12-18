@@ -19,7 +19,7 @@ def homepage():
 
     ensure(READ,current_team)
 
-    users = [u for u in User.select().where(User.team == current_team) if g.user.can(READ,u)]
+    users = [u for u in User.select().where(User.team == current_team, User.active == True) if g.user.can(READ,u)]
     return render_template("index.html", teams=teams, users=users, active_team=current_team)
 
 def has_score(scores):
